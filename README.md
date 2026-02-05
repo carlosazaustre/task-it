@@ -364,28 +364,6 @@ task-it/
 
 ---
 
-## 🤝 Contribuir
-
-Las contribuciones son bienvenidas. Por favor:
-
-1. Haz fork del repositorio
-2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Haz commit de tus cambios siguiendo [Conventional Commits](https://www.conventionalcommits.org/)
-4. Push a tu rama (`git push origin feature/nueva-funcionalidad`)
-5. Abre un Pull Request
-
-### Convenciones de Commits
-
-```
-feat(scope): add new feature
-fix(scope): fix bug description
-refactor(scope): code refactoring
-docs: update documentation
-chore: maintenance tasks
-```
-
----
-
 ## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
@@ -401,5 +379,5 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 ---
 
 <p align="center">
-  Hecho con 💜 usando Next.js y Tailwind CSS
+  Hecho con 💜 usando Next.js y Tailwind CSS (Y Claude ＊)
 </p>
