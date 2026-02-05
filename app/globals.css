@@ -1,33 +1,41 @@
 @import "tailwindcss";
 
 /* =============================================
-   CSS Variables
+   V3 Minimal Vibrant Design System
+   CSS Variables - Light Theme (Default)
    ============================================= */
 
 :root {
   /* Background & Foreground */
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #FFFFFF;
+  --foreground: #18181B;
 
-  /* Primary (Blue) */
-  --primary: #2563eb;
-  --primary-foreground: #ffffff;
+  /* Primary (Violet) */
+  --primary: #8B5CF6;
+  --primary-foreground: #FFFFFF;
 
-  /* Secondary (Gray) */
-  --secondary: #f3f4f6;
-  --secondary-foreground: #374151;
+  /* Secondary (Zinc-100) */
+  --secondary: #F4F4F5;
+  --secondary-foreground: #71717A;
 
   /* Destructive (Red) */
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
 
   /* Muted */
-  --muted: #f9fafb;
-  --muted-foreground: #6b7280;
+  --muted: #F4F4F5;
+  --muted-foreground: #71717A;
+
+  /* Card */
+  --card: #F4F4F5;
+  --card-foreground: #18181B;
 
   /* Border & Ring */
-  --border: #e5e7eb;
-  --ring: #2563eb;
+  --border: #E4E4E7;
+  --ring: #8B5CF6;
+
+  /* Accent (Violet with 12.5% opacity for active states) */
+  --accent: #8B5CF620;
 
   /* Status Colors */
   --status-pending: #f59e0b;
@@ -43,27 +51,67 @@
   --date-overdue: #dc2626;
   --date-today: #f97316;
   --date-soon: #eab308;
+
+  /* Border Radius */
+  --radius-sm: 14px;
+  --radius-md: 20px;
+  --radius-lg: 24px;
 }
 
+/* =============================================
+   Dark Theme - Class-based
+   ============================================= */
+
+.dark {
+  --background: #18181B;
+  --foreground: #FAFAFA;
+
+  --primary: #A78BFA;
+  --primary-foreground: #FFFFFF;
+
+  --secondary: #27272A;
+  --secondary-foreground: #A1A1AA;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  --muted: #27272A;
+  --muted-foreground: #A1A1AA;
+
+  --card: #27272A;
+  --card-foreground: #FAFAFA;
+
+  --border: #3F3F46;
+  --ring: #A78BFA;
+
+  --accent: #A78BFA20;
+}
+
+/* Fallback for prefers-color-scheme before JS loads */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not(.light) {
+    --background: #18181B;
+    --foreground: #FAFAFA;
 
-    --primary: #3b82f6;
-    --primary-foreground: #ffffff;
+    --primary: #A78BFA;
+    --primary-foreground: #FFFFFF;
 
-    --secondary: #27272a;
-    --secondary-foreground: #d4d4d8;
+    --secondary: #27272A;
+    --secondary-foreground: #A1A1AA;
 
     --destructive: #ef4444;
     --destructive-foreground: #ffffff;
 
-    --muted: #18181b;
-    --muted-foreground: #a1a1aa;
+    --muted: #27272A;
+    --muted-foreground: #A1A1AA;
 
-    --border: #27272a;
-    --ring: #3b82f6;
+    --card: #27272A;
+    --card-foreground: #FAFAFA;
+
+    --border: #3F3F46;
+    --ring: #A78BFA;
+
+    --accent: #A78BFA20;
   }
 }
 
@@ -82,8 +130,11 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
   --color-border: var(--border);
   --color-ring: var(--ring);
+  --color-accent: var(--accent);
 
   --color-status-pending: var(--status-pending);
   --color-status-in-progress: var(--status-in-progress);
@@ -93,8 +144,16 @@
   --color-priority-medium: var(--priority-medium);
   --color-priority-low: var(--priority-low);
 
+  /* Typography */
+  --font-heading: var(--font-jakarta);
+  --font-body: var(--font-inter);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Border Radius */
+  --radius-sm: 14px;
+  --radius-md: 20px;
+  --radius-lg: 24px;
 }
 
 /* =============================================
@@ -102,9 +161,10 @@
    ============================================= */
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
 }
 
 /* =============================================
@@ -160,24 +220,43 @@ body {
   @apply transition-all duration-300 ease-out;
 }
 
+.transition-theme {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
 /* =============================================
    Component Base Classes
    ============================================= */
 
-/* Cards */
+/* Cards - Minimal Solid */
 .card {
-  @apply bg-background rounded-lg border border-border p-4 shadow-sm;
+  background-color: var(--card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  padding: 1rem;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .card:hover {
-  @apply shadow-md;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
 }
 
-/* Inputs */
+/* Inputs - Minimal Solid */
 .input {
-  @apply w-full rounded-md border border-border bg-background px-3 py-2
-         text-foreground placeholder:text-muted-foreground
+  @apply w-full px-3 py-2 text-foreground placeholder:text-muted-foreground
          focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent;
+  background-color: var(--secondary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  min-height: 44px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.input:focus {
+  border-color: var(--primary);
+  background-color: var(--background);
 }
 
 .input-error {
@@ -186,17 +265,33 @@ body {
 
 /* Buttons */
 .btn {
-  @apply inline-flex items-center justify-center rounded-md font-medium
-         transition-colors focus:outline-none focus:ring-2 focus:ring-ring
+  @apply inline-flex items-center justify-center font-medium
+         transition-all focus:outline-none focus:ring-2 focus:ring-ring
          disabled:opacity-50 disabled:cursor-not-allowed;
+  border-radius: var(--radius-sm);
+  min-height: 44px;
+  min-width: 44px;
 }
 
 .btn-primary {
   @apply bg-primary text-primary-foreground hover:bg-primary/90;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
+  transform: translateY(-1px);
 }
 
 .btn-secondary {
-  @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background-color: var(--muted);
+  border-color: var(--border);
 }
 
 .btn-destructive {
@@ -204,7 +299,11 @@ body {
 }
 
 .btn-ghost {
-  @apply bg-transparent hover:bg-secondary;
+  @apply bg-transparent text-foreground;
+}
+
+.btn-ghost:hover {
+  background-color: var(--accent);
 }
 
 /* =============================================
