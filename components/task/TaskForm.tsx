@@ -4,6 +4,11 @@ import { useState, useMemo } from 'react';
 import type { Task, Tag, TaskFormData, TaskStatus, TaskPriority } from '@/lib/types';
 import { TASK_STATUSES, TASK_PRIORITIES, DEFAULT_TASK, VALIDATION } from '@/lib/constants';
 import { TaskTagsInput } from './TaskTagsInput';
+import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
+import { Textarea } from '@/components/ui/Textarea';
+import { Button } from '@/components/ui/Button';
 
 interface TaskFormProps {
   task?: Task;
@@ -101,100 +106,103 @@ export function TaskForm({
     }
   };
 
+  // Status options for Select component
+  const statusOptions = TASK_STATUSES.map((status) => ({
+    value: status.value,
+    label: status.label,
+  }));
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       {/* Title */}
       <div>
-        <label htmlFor="task-title" className="block text-sm font-medium text-foreground mb-1">
+        <label
+          htmlFor="task-title"
+          className="block text-sm font-semibold text-foreground mb-2"
+        >
           Titulo <span className="text-destructive">*</span>
         </label>
-        <input
+        <Input
           id="task-title"
           type="text"
           value={formData.title}
           onChange={(e) => handleChange('title', e.target.value)}
           placeholder="Escribe el titulo de la tarea"
-          className={`input ${errors.title ? 'input-error' : ''}`}
-          aria-invalid={!!errors.title}
-          aria-describedby={errors.title ? 'title-error' : undefined}
+          error={errors.title}
           maxLength={VALIDATION.TASK_TITLE_MAX_LENGTH}
           disabled={isSubmitting}
         />
-        {errors.title && (
-          <p id="title-error" className="text-sm text-destructive mt-1">
-            {errors.title}
-          </p>
-        )}
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="text-xs text-muted-foreground mt-1.5">
           {formData.title.length}/{VALIDATION.TASK_TITLE_MAX_LENGTH}
         </p>
       </div>
 
       {/* Description */}
       <div>
-        <label htmlFor="task-description" className="block text-sm font-medium text-foreground mb-1">
+        <label
+          htmlFor="task-description"
+          className="block text-sm font-semibold text-foreground mb-2"
+        >
           Descripcion
         </label>
-        <textarea
+        <Textarea
           id="task-description"
           value={formData.description}
           onChange={(e) => handleChange('description', e.target.value)}
           placeholder="Describe la tarea (opcional)"
-          className={`input min-h-24 resize-y ${errors.description ? 'input-error' : ''}`}
-          aria-invalid={!!errors.description}
-          aria-describedby={errors.description ? 'description-error' : undefined}
+          error={errors.description}
           maxLength={VALIDATION.TASK_DESCRIPTION_MAX_LENGTH}
           disabled={isSubmitting}
           rows={3}
         />
-        {errors.description && (
-          <p id="description-error" className="text-sm text-destructive mt-1">
-            {errors.description}
-          </p>
-        )}
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="text-xs text-muted-foreground mt-1.5">
           {formData.description.length}/{VALIDATION.TASK_DESCRIPTION_MAX_LENGTH}
         </p>
       </div>
 
-      {/* Status and Priority */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* Status and Priority - Two column layout */}
+      <div className="flex gap-4">
         {/* Status */}
-        <div>
-          <label htmlFor="task-status" className="block text-sm font-medium text-foreground mb-1">
+        <div className="flex-1">
+          <label
+            htmlFor="task-status"
+            className="block text-sm font-semibold text-foreground mb-2"
+          >
             Estado
           </label>
-          <select
+          <Select
             id="task-status"
             value={formData.status}
             onChange={(e) => handleChange('status', e.target.value as TaskStatus)}
-            className="input"
+            options={statusOptions}
             disabled={isSubmitting}
-          >
-            {TASK_STATUSES.map((status) => (
-              <option key={status.value} value={status.value}>
-                {status.label}
-              </option>
-            ))}
-          </select>
+          />
         </div>
 
         {/* Priority */}
-        <div>
-          <span className="block text-sm font-medium text-foreground mb-1">Prioridad</span>
+        <div className="flex-1">
+          <span className="block text-sm font-semibold text-foreground mb-2">
+            Prioridad
+          </span>
           <div className="flex gap-4 mt-2">
             {TASK_PRIORITIES.map((priority) => (
-              <label key={priority.value} className="inline-flex items-center gap-1.5 cursor-pointer">
+              <label
+                key={priority.value}
+                className="inline-flex items-center gap-1.5 cursor-pointer"
+              >
                 <input
                   type="radio"
                   name="priority"
                   value={priority.value}
                   checked={formData.priority === priority.value}
                   onChange={(e) => handleChange('priority', e.target.value as TaskPriority)}
-                  className="w-4 h-4 text-primary focus:ring-ring"
+                  className={cn(
+                    'w-4 h-4 text-primary border-border',
+                    'focus:ring-2 focus:ring-primary/20 focus:ring-offset-0'
+                  )}
                   disabled={isSubmitting}
                 />
-                <span className="text-sm">{priority.label}</span>
+                <span className="text-sm text-foreground">{priority.label}</span>
               </label>
             ))}
           </div>
@@ -203,22 +211,24 @@ export function TaskForm({
 
       {/* Due Date */}
       <div>
-        <label htmlFor="task-due-date" className="block text-sm font-medium text-foreground mb-1">
+        <label
+          htmlFor="task-due-date"
+          className="block text-sm font-semibold text-foreground mb-2"
+        >
           Fecha limite
         </label>
-        <input
+        <Input
           id="task-due-date"
           type="date"
           value={formData.dueDate || ''}
           onChange={(e) => handleChange('dueDate', e.target.value || null)}
-          className="input"
           disabled={isSubmitting}
         />
       </div>
 
       {/* Tags */}
       <div>
-        <label className="block text-sm font-medium text-foreground mb-1">
+        <label className="block text-sm font-semibold text-foreground mb-2">
           Etiquetas
         </label>
         <TaskTagsInput
@@ -230,48 +240,22 @@ export function TaskForm({
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
-        <button
+      <div className="flex items-center justify-end gap-3 pt-5 border-t border-border">
+        <Button
           type="button"
+          variant="secondary"
           onClick={onCancel}
-          className="btn btn-secondary px-4 py-2"
           disabled={isSubmitting}
         >
           Cancelar
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
-          className="btn btn-primary px-4 py-2"
-          disabled={isSubmitting}
+          variant="primary"
+          isLoading={isSubmitting}
         >
-          {isSubmitting ? (
-            <>
-              <svg
-                className="animate-spin -ml-1 mr-2 h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-              Guardando...
-            </>
-          ) : (
-            <>{isEditMode ? 'Guardar cambios' : 'Crear tarea'}</>
-          )}
-        </button>
+          {isEditMode ? 'Guardar cambios' : 'Crear tarea'}
+        </Button>
       </div>
     </form>
   );

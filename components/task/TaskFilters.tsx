@@ -4,6 +4,9 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { TaskFilters as TaskFiltersType, Tag, TaskStatus, TaskPriority } from '@/lib/types';
 import { TASK_STATUSES, TASK_PRIORITIES, DEFAULT_FILTERS } from '@/lib/constants';
 import { TAG_COLOR_STYLES } from './TaskTagsInput';
+import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 
 interface TaskFiltersProps {
   filters: TaskFiltersType;
@@ -14,6 +17,11 @@ interface TaskFiltersProps {
     filtered: number;
   };
 }
+
+// V3 Minimal Vibrant - Filter pill styling
+const filterPillBase = 'py-2 px-4 rounded-[20px] text-sm font-medium transition-all';
+const filterPillInactive = 'bg-secondary text-foreground hover:bg-secondary/80';
+const filterPillActive = 'bg-[#8B5CF620] text-primary';
 
 export function TaskFilters({ filters, tags, onChange, taskCount }: TaskFiltersProps) {
   // Use a key pattern to detect when filters.search changes externally
@@ -83,7 +91,7 @@ export function TaskFilters({ filters, tags, onChange, taskCount }: TaskFiltersP
     filters.tags.length > 0;
 
   return (
-    <div className="space-y-4 p-4 bg-muted rounded-lg">
+    <div className="space-y-5 p-5 bg-card rounded-[24px]">
       {/* Search input */}
       <div className="relative">
         <svg
@@ -100,64 +108,81 @@ export function TaskFilters({ filters, tags, onChange, taskCount }: TaskFiltersP
             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
           />
         </svg>
-        <input
+        <Input
           type="text"
           value={localSearch}
           onChange={(e) => setLocalSearch(e.target.value)}
           placeholder="Buscar tareas..."
-          className="input pl-10"
+          className="pl-10"
           aria-label="Buscar tareas por titulo o descripcion"
         />
       </div>
 
-      {/* Status and Priority filters */}
-      <div className="flex flex-wrap gap-4">
-        {/* Status filter */}
-        <div className="flex-1 min-w-[150px]">
-          <label htmlFor="filter-status" className="block text-sm font-medium text-foreground mb-1">
-            Estado
-          </label>
-          <select
-            id="filter-status"
-            value={filters.status}
-            onChange={(e) => handleStatusChange(e.target.value as TaskStatus | 'all')}
-            className="input"
+      {/* Status filter pills */}
+      <div>
+        <span className="block text-sm font-semibold text-foreground mb-3">Estado</span>
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => handleStatusChange('all')}
+            className={cn(
+              filterPillBase,
+              filters.status === 'all' ? filterPillActive : filterPillInactive
+            )}
           >
-            <option value="all">Todos</option>
-            {TASK_STATUSES.map((status) => (
-              <option key={status.value} value={status.value}>
-                {status.label}
-              </option>
-            ))}
-          </select>
+            Todos
+          </button>
+          {TASK_STATUSES.map((status) => (
+            <button
+              key={status.value}
+              type="button"
+              onClick={() => handleStatusChange(status.value)}
+              className={cn(
+                filterPillBase,
+                filters.status === status.value ? filterPillActive : filterPillInactive
+              )}
+            >
+              {status.label}
+            </button>
+          ))}
         </div>
+      </div>
 
-        {/* Priority filter */}
-        <div className="flex-1 min-w-[150px]">
-          <label htmlFor="filter-priority" className="block text-sm font-medium text-foreground mb-1">
-            Prioridad
-          </label>
-          <select
-            id="filter-priority"
-            value={filters.priority}
-            onChange={(e) => handlePriorityChange(e.target.value as TaskPriority | 'all')}
-            className="input"
+      {/* Priority filter pills */}
+      <div>
+        <span className="block text-sm font-semibold text-foreground mb-3">Prioridad</span>
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => handlePriorityChange('all')}
+            className={cn(
+              filterPillBase,
+              filters.priority === 'all' ? filterPillActive : filterPillInactive
+            )}
           >
-            <option value="all">Todas</option>
-            {TASK_PRIORITIES.map((priority) => (
-              <option key={priority.value} value={priority.value}>
-                {priority.label}
-              </option>
-            ))}
-          </select>
+            Todas
+          </button>
+          {TASK_PRIORITIES.map((priority) => (
+            <button
+              key={priority.value}
+              type="button"
+              onClick={() => handlePriorityChange(priority.value)}
+              className={cn(
+                filterPillBase,
+                filters.priority === priority.value ? filterPillActive : filterPillInactive
+              )}
+            >
+              {priority.label}
+            </button>
+          ))}
         </div>
       </div>
 
       {/* Tags filter */}
       {tags.length > 0 && (
         <div>
-          <span className="block text-sm font-medium text-foreground mb-2">Etiquetas</span>
-          <div className="flex flex-wrap gap-2">
+          <span className="block text-sm font-semibold text-foreground mb-3">Etiquetas</span>
+          <div className="flex flex-wrap gap-3">
             {tags.map((tag) => {
               const isSelected = filters.tags.includes(tag.id);
               return (
@@ -165,11 +190,13 @@ export function TaskFilters({ filters, tags, onChange, taskCount }: TaskFiltersP
                   key={tag.id}
                   type="button"
                   onClick={() => handleTagToggle(tag.id)}
-                  className={`px-3 py-1 rounded-full text-sm transition-all ${
+                  className={cn(
+                    'py-2 px-4 rounded-[20px] text-sm font-medium transition-all',
+                    TAG_COLOR_STYLES[tag.color],
                     isSelected
-                      ? `${TAG_COLOR_STYLES[tag.color]} ring-2 ring-ring ring-offset-2`
-                      : `${TAG_COLOR_STYLES[tag.color]} opacity-60 hover:opacity-100`
-                  }`}
+                      ? 'ring-2 ring-primary ring-offset-2'
+                      : 'opacity-60 hover:opacity-100'
+                  )}
                   aria-pressed={isSelected}
                   aria-label={`Filtrar por etiqueta ${tag.name}`}
                 >
@@ -182,32 +209,34 @@ export function TaskFilters({ filters, tags, onChange, taskCount }: TaskFiltersP
       )}
 
       {/* Results count and clear button */}
-      <div className="flex items-center justify-between pt-2 border-t border-border">
+      <div className="flex items-center justify-between pt-4 border-t border-border">
         <span className="text-sm text-muted-foreground">
           Mostrando {taskCount.filtered} de {taskCount.total} tareas
         </span>
         {hasActiveFilters && (
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={handleClearFilters}
-            className="btn btn-ghost text-sm px-3 py-1"
+            leftIcon={
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            }
           >
-            <svg
-              className="w-4 h-4 mr-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
             Limpiar filtros
-          </button>
+          </Button>
         )}
       </div>
     </div>

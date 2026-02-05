@@ -2,36 +2,54 @@
 
 import type { TaskStatus } from '@/lib/types';
 import { TASK_STATUSES } from '@/lib/constants';
+import { cn } from '@/lib/utils';
 
 interface TaskStatusBadgeProps {
   status: TaskStatus;
   onClick?: () => void;
   interactive?: boolean;
+  className?: string;
 }
 
-const STATUS_STYLES: Record<TaskStatus, { bg: string; text: string; icon: string }> = {
+// V3 Minimal Vibrant - Status colors with transparency backgrounds
+const STATUS_STYLES: Record<TaskStatus, { bg: string; text: string; border: string; icon: string }> = {
   pending: {
-    bg: 'bg-amber-100 dark:bg-amber-900',
-    text: 'text-amber-800 dark:text-amber-200',
-    icon: '\u25CB', // ○
+    bg: 'bg-[#F59E0B]/10',
+    text: 'text-[#F59E0B]',
+    border: 'border-[#F59E0B]/20',
+    icon: '\u25CB', // Circle outline
   },
   in_progress: {
-    bg: 'bg-blue-100 dark:bg-blue-900',
-    text: 'text-blue-800 dark:text-blue-200',
-    icon: '\u25D0', // ◐
+    bg: 'bg-[#3B82F6]/10',
+    text: 'text-[#3B82F6]',
+    border: 'border-[#3B82F6]/20',
+    icon: '\u25D0', // Half circle
   },
   completed: {
-    bg: 'bg-green-100 dark:bg-green-900',
-    text: 'text-green-800 dark:text-green-200',
-    icon: '\u2713', // ✓
+    bg: 'bg-[#22C55E]/10',
+    text: 'text-[#22C55E]',
+    border: 'border-[#22C55E]/20',
+    icon: '\u2713', // Checkmark
   },
 };
 
-export function TaskStatusBadge({ status, onClick, interactive = false }: TaskStatusBadgeProps) {
+export function TaskStatusBadge({
+  status,
+  onClick,
+  interactive = false,
+  className
+}: TaskStatusBadgeProps) {
   const styles = STATUS_STYLES[status];
   const statusLabel = TASK_STATUSES.find((s) => s.value === status)?.label || status;
 
-  const baseClasses = `inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-medium ${styles.bg} ${styles.text}`;
+  const baseClasses = cn(
+    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border',
+    styles.bg,
+    styles.text,
+    styles.border,
+    className
+  );
+
   const interactiveClasses = interactive
     ? 'cursor-pointer hover:opacity-80 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
     : '';
@@ -41,7 +59,7 @@ export function TaskStatusBadge({ status, onClick, interactive = false }: TaskSt
       <button
         type="button"
         onClick={onClick}
-        className={`${baseClasses} ${interactiveClasses}`}
+        className={cn(baseClasses, interactiveClasses)}
         role="button"
         aria-pressed={status === 'completed'}
         aria-label={`Estado: ${statusLabel}. Click para cambiar estado`}
