@@ -14,35 +14,23 @@ interface TaskListProps {
 
 function TaskSkeleton() {
   return (
-    <div className="card border-l-4 border-l-gray-200 animate-pulse">
-      {/* Header skeleton */}
-      <div className="flex items-start justify-between gap-3 mb-2">
-        <div className="flex items-center gap-2 flex-1">
-          <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded-full" />
-          <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+    <div className="bg-card rounded-[24px] p-5 animate-pulse">
+      {/* Horizontal layout: checkbox + content left, tag + date right */}
+      <div className="flex items-center justify-between gap-4">
+        {/* Left side: checkbox + title + meta */}
+        <div className="flex items-center gap-4 flex-1">
+          <div className="w-7 h-7 bg-muted rounded-full flex-shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="h-5 bg-muted rounded-lg w-2/3" />
+            <div className="h-4 bg-muted rounded-lg w-1/2" />
+          </div>
         </div>
-        <div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded-full" />
-      </div>
 
-      {/* Description skeleton */}
-      <div className="space-y-2 mb-3">
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full" />
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
-      </div>
-
-      {/* Footer skeleton */}
-      <div className="flex items-center justify-between gap-2 mb-3">
-        <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded" />
-        <div className="flex gap-1">
-          <div className="h-5 w-12 bg-gray-200 dark:bg-gray-700 rounded-full" />
-          <div className="h-5 w-12 bg-gray-200 dark:bg-gray-700 rounded-full" />
+        {/* Right side: tag + date */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="h-6 w-20 bg-muted rounded-xl" />
+          <div className="h-5 w-14 bg-muted rounded-lg" />
         </div>
-      </div>
-
-      {/* Actions skeleton */}
-      <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
-        <div className="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded" />
-        <div className="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded" />
       </div>
     </div>
   );
@@ -51,7 +39,7 @@ function TaskSkeleton() {
 function EmptyState() {
   return (
     <div
-      className="text-center py-12 px-4"
+      className="text-center py-16 px-6 bg-card rounded-[24px]"
       role="status"
       aria-label="No hay tareas"
     >
@@ -69,8 +57,8 @@ function EmptyState() {
           d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
         />
       </svg>
-      <h3 className="text-lg font-medium text-foreground mb-2">No hay tareas</h3>
-      <p className="text-muted-foreground">
+      <h3 className="text-lg font-semibold text-foreground mb-2">No hay tareas</h3>
+      <p className="text-muted-foreground text-sm max-w-sm mx-auto">
         Crea tu primera tarea para comenzar a organizar tu trabajo.
       </p>
     </div>
@@ -87,8 +75,8 @@ export function TaskList({
 }: TaskListProps) {
   if (isLoading) {
     return (
-      <div className="task-grid">
-        {Array.from({ length: 6 }).map((_, index) => (
+      <div className="flex flex-col gap-3">
+        {Array.from({ length: 4 }).map((_, index) => (
           <TaskSkeleton key={index} />
         ))}
       </div>
@@ -100,7 +88,7 @@ export function TaskList({
   }
 
   return (
-    <div className="task-grid">
+    <div className="flex flex-col gap-3">
       {tasks.map((task) => (
         <TaskCard
           key={task.id}

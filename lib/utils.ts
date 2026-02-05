@@ -57,3 +57,38 @@ export function formatRelativeDate(date: string): string {
     return `Hace ${Math.ceil(Math.abs(diffDays) / 7)} semanas`;
   }
 }
+
+/**
+ * Format a date string as short date
+ * Example: "15 Feb"
+ */
+export function formatShortDate(date: string): string {
+  const inputDate = new Date(date);
+  return new Intl.DateTimeFormat('es-ES', {
+    day: 'numeric',
+    month: 'short'
+  }).format(inputDate);
+}
+
+/**
+ * Check if two dates are the same day
+ */
+export function isSameDay(date1: Date, date2: Date): boolean {
+  return (
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate()
+  );
+}
+
+/**
+ * Format time from date string
+ * Example: "14:30"
+ */
+export function formatTime(date: string): string {
+  const inputDate = new Date(date);
+  return new Intl.DateTimeFormat('es-ES', {
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(inputDate);
+}
