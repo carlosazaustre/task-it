@@ -22,7 +22,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         {label && (
           <label
             htmlFor={textareaId}
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            className="block text-sm font-semibold text-foreground mb-2"
           >
             {label}
           </label>
@@ -31,14 +31,13 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           id={textareaId}
           className={cn(
-            'w-full px-3 py-2 rounded-md border transition-colors resize-y',
-            'min-h-[88px]',
-            'focus:outline-none focus:ring-2',
-            error
-              ? 'border-red-500 focus:border-red-500 focus:ring-red-200'
-              : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200',
-            props.disabled && 'bg-gray-100 cursor-not-allowed',
-            'dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100',
+            'w-full px-4 py-3.5 rounded-[14px] border-0 transition-all resize-y',
+            'min-h-[120px]',
+            'bg-secondary',
+            'text-foreground placeholder:text-muted-foreground',
+            'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
+            error && 'ring-2 ring-destructive/30 focus:ring-destructive/30',
+            props.disabled && 'opacity-50 cursor-not-allowed',
             className
           )}
           aria-invalid={error ? 'true' : undefined}
@@ -48,7 +47,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         {hint && !error && (
           <span
             id={hintId}
-            className="block mt-1 text-sm text-gray-500 dark:text-gray-400"
+            className="block mt-1.5 text-sm text-muted-foreground"
           >
             {hint}
           </span>
@@ -56,7 +55,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         {error && (
           <span
             id={errorId}
-            className="block mt-1 text-sm text-red-600 dark:text-red-400"
+            className="block mt-1.5 text-sm text-destructive"
             role="alert"
           >
             {error}

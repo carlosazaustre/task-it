@@ -8,6 +8,7 @@ interface ModalProps {
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
+  footer?: React.ReactNode;
   size?: 'sm' | 'md' | 'lg';
   closeOnBackdrop?: boolean;
   closeOnEscape?: boolean;
@@ -24,6 +25,7 @@ export function Modal({
   onClose,
   title,
   children,
+  footer,
   size = 'md',
   closeOnBackdrop = true,
   closeOnEscape = true,
@@ -83,7 +85,7 @@ export function Modal({
     <div
       className={cn(
         'fixed inset-0 z-50 flex items-center justify-center p-4',
-        'bg-black/50 backdrop-blur-sm',
+        'bg-black/40',
         'animate-in fade-in duration-200'
       )}
       onClick={handleBackdropClick}
@@ -95,16 +97,17 @@ export function Modal({
         ref={modalRef}
         tabIndex={-1}
         className={cn(
-          'relative w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl',
+          'relative w-full bg-background rounded-[24px] shadow-lg',
           'animate-in zoom-in-95 duration-200',
           sizeClasses[size]
         )}
       >
-        <header className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        {/* Header */}
+        <header className="flex items-center justify-between p-6 border-b border-border">
           {title && (
             <h2
               id="modal-title"
-              className="text-lg font-semibold text-gray-900 dark:text-gray-100"
+              className="font-jakarta font-bold text-xl text-foreground"
             >
               {title}
             </h2>
@@ -113,10 +116,10 @@ export function Modal({
             type="button"
             onClick={onClose}
             className={cn(
-              'p-2 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
-              'hover:bg-gray-100 dark:hover:bg-gray-700',
-              'focus:outline-none focus:ring-2 focus:ring-blue-500',
-              'min-w-[44px] min-h-[44px] flex items-center justify-center',
+              'w-9 h-9 rounded-full bg-secondary text-muted-foreground',
+              'hover:text-foreground hover:bg-secondary/80 transition-all',
+              'focus:outline-none focus:ring-2 focus:ring-primary/20',
+              'flex items-center justify-center',
               !title && 'ml-auto'
             )}
             aria-label="Cerrar modal"
@@ -129,14 +132,23 @@ export function Modal({
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="w-5 h-5"
+              className="w-4 h-4"
             >
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </header>
-        <div className="p-4">{children}</div>
+
+        {/* Content */}
+        <div className="p-6">{children}</div>
+
+        {/* Footer */}
+        {footer && (
+          <footer className="p-6 border-t border-border">
+            {footer}
+          </footer>
+        )}
       </div>
     </div>
   );

@@ -4,8 +4,7 @@ import { cn } from '@/lib/utils';
 
 interface BadgeProps {
   children: React.ReactNode;
-  variant?: 'default' | 'success' | 'warning' | 'error' | 'info';
-  color?: string;
+  variant?: 'default' | 'primary' | 'success' | 'warning' | 'error' | 'info';
   size?: 'sm' | 'md';
   removable?: boolean;
   onRemove?: () => void;
@@ -13,22 +12,22 @@ interface BadgeProps {
 }
 
 const variantClasses = {
-  default: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
-  success: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  warning: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-  error: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-  info: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  default: 'bg-secondary text-secondary-foreground',
+  primary: 'bg-primary/10 text-primary',
+  success: 'bg-emerald-50 text-emerald-600',
+  warning: 'bg-amber-50 text-amber-600',
+  error: 'bg-red-50 text-red-600',
+  info: 'bg-blue-50 text-blue-600',
 };
 
 const sizeClasses = {
-  sm: 'px-2 py-0.5 text-xs',
-  md: 'px-2.5 py-1 text-sm',
+  sm: 'px-2.5 py-1 text-xs',
+  md: 'px-3 py-1.5 text-sm',
 };
 
 export function Badge({
   children,
   variant = 'default',
-  color,
   size = 'md',
   removable = false,
   onRemove,
@@ -38,10 +37,9 @@ export function Badge({
     <span
       role="status"
       className={cn(
-        'inline-flex items-center gap-1 rounded-full font-medium',
-        !color && variantClasses[variant],
+        'inline-flex items-center gap-1.5 rounded-full font-medium',
+        variantClasses[variant],
         sizeClasses[size],
-        color,
         className
       )}
     >
@@ -52,8 +50,8 @@ export function Badge({
           onClick={onRemove}
           className={cn(
             'inline-flex items-center justify-center rounded-full',
-            'min-w-[20px] min-h-[20px]',
-            'hover:bg-black/10 dark:hover:bg-white/10',
+            'w-4 h-4',
+            'hover:bg-black/10',
             'focus:outline-none focus:ring-2 focus:ring-current',
             'transition-colors'
           )}
@@ -63,7 +61,7 @@ export function Badge({
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             fill="currentColor"
-            className="w-3.5 h-3.5"
+            className="w-3 h-3"
           >
             <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
           </svg>

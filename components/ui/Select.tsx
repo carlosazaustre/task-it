@@ -26,48 +26,62 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         {label && (
           <label
             htmlFor={selectId}
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            className="block text-sm font-semibold text-foreground mb-2"
           >
             {label}
           </label>
         )}
-        <select
-          ref={ref}
-          id={selectId}
-          className={cn(
-            'w-full px-3 py-2 rounded-md border transition-colors appearance-none',
-            'min-h-[44px]',
-            'focus:outline-none focus:ring-2',
-            'bg-white dark:bg-gray-800',
-            'bg-[url("data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 20 20%27%3e%3cpath stroke=%27%236b7280%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%271.5%27 d=%27M6 8l4 4 4-4%27/%3e%3c/svg%3e")]',
-            'bg-[length:1.5em_1.5em] bg-[right_0.5rem_center] bg-no-repeat',
-            'pr-10',
-            error
-              ? 'border-red-500 focus:border-red-500 focus:ring-red-200'
-              : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200',
-            props.disabled && 'bg-gray-100 cursor-not-allowed',
-            'dark:border-gray-600 dark:text-gray-100',
-            className
-          )}
-          aria-invalid={error ? 'true' : undefined}
-          aria-describedby={errorId}
-          {...props}
-        >
-          {placeholder && (
-            <option value="" disabled>
-              {placeholder}
-            </option>
-          )}
-          {options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            ref={ref}
+            id={selectId}
+            className={cn(
+              'w-full px-4 py-3.5 rounded-[14px] border-0 transition-all appearance-none',
+              'min-h-[44px]',
+              'bg-secondary',
+              'text-foreground',
+              'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
+              'pr-10',
+              error && 'ring-2 ring-destructive/30 focus:ring-destructive/30',
+              props.disabled && 'opacity-50 cursor-not-allowed',
+              className
+            )}
+            aria-invalid={error ? 'true' : undefined}
+            aria-describedby={errorId}
+            {...props}
+          >
+            {placeholder && (
+              <option value="" disabled>
+                {placeholder}
+              </option>
+            )}
+            {options.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          {/* Custom dropdown arrow */}
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+            <svg
+              className="h-5 w-5 text-muted-foreground"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+        </div>
         {error && (
           <span
             id={errorId}
-            className="block mt-1 text-sm text-red-600 dark:text-red-400"
+            className="block mt-1.5 text-sm text-destructive"
             role="alert"
           >
             {error}

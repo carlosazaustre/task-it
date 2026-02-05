@@ -22,7 +22,7 @@ export function Spinner({ size = 'md', color, className }: SpinnerProps) {
       className={cn(
         'animate-spin',
         sizeClasses[size],
-        color || 'text-blue-600',
+        color || 'text-primary',
         className
       )}
       xmlns="http://www.w3.org/2000/svg"
