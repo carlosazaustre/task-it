@@ -87,6 +87,12 @@ export function Sidebar({
             active={currentPath === '/calendar'}
           />
           <NavItem
+            icon="timer"
+            label="Pomodoro"
+            href="/pomodoro"
+            active={currentPath === '/pomodoro'}
+          />
+          <NavItem
             icon="settings"
             label="Ajustes"
             active={currentPath === '/settings'}

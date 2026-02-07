@@ -4,14 +4,16 @@ import {
   ListTodo,
   Calendar,
   Settings,
+  Timer,
 } from 'lucide-react';
 
-type IconName = 'layout-dashboard' | 'list-todo' | 'calendar' | 'settings';
+type IconName = 'layout-dashboard' | 'list-todo' | 'calendar' | 'timer' | 'settings';
 
 const ICONS: Record<IconName, React.ComponentType<{ className?: string }>> = {
   'layout-dashboard': LayoutDashboard,
   'list-todo': ListTodo,
   'calendar': Calendar,
+  'timer': Timer,
   'settings': Settings,
 };
 

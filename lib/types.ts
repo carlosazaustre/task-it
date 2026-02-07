@@ -80,3 +80,34 @@ export interface TaskSort {
   field: TaskSortField;
   order: TaskSortOrder;
 }
+
+// Pomodoro Types
+export type PomodoroSessionType = 'focus' | 'short_break' | 'long_break';
+export type PomodoroPhase = 'setup' | 'active' | 'completed';
+
+export interface PomodoroConfig {
+  totalDurationMinutes: number;
+  focusMinutes: number;
+  shortBreakMinutes: number;
+  longBreakMinutes: number;
+  longBreakInterval: number;
+}
+
+export interface PomodoroSession {
+  index: number;
+  type: PomodoroSessionType;
+  durationMinutes: number;
+  taskId: string | null;
+  label: string;
+}
+
+export interface PomodoroState {
+  phase: PomodoroPhase;
+  config: PomodoroConfig;
+  sessions: PomodoroSession[];
+  taskIds: string[];
+  currentSessionIndex: number;
+  timeRemainingSeconds: number;
+  isPaused: boolean;
+  startedAt: string | null;
+}

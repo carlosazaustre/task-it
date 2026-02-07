@@ -5,6 +5,7 @@ import type {
   TaskFormData,
   TaskFilters,
   CalendarViewType,
+  PomodoroConfig,
 } from './types';
 
 // Task Status metadata
@@ -73,6 +74,8 @@ export const DEFAULT_FILTERS: TaskFilters = {
 export const STORAGE_KEYS = {
   TASKS: 'task-it-tasks',
   TAGS: 'task-it-tags',
+  POMODORO_CONFIG: 'task-it-pomodoro-config',
+  POMODORO_STATE: 'task-it-pomodoro-state',
 } as const;
 
 // Validation limits
@@ -98,3 +101,48 @@ export const CALENDAR_DEFAULTS = {
   HOUR_HEIGHT_PX: 80,
   WEEK_HOUR_HEIGHT_PX: 60,
 } as const;
+
+// Pomodoro
+export const POMODORO_DEFAULTS: PomodoroConfig = {
+  totalDurationMinutes: 240,
+  focusMinutes: 25,
+  shortBreakMinutes: 5,
+  longBreakMinutes: 15,
+  longBreakInterval: 4,
+};
+
+export const POMODORO_DURATION_OPTIONS = [
+  { value: 120, label: '2h' },
+  { value: 240, label: '4h' },
+  { value: 360, label: '6h' },
+  { value: 480, label: '8h' },
+];
+
+export const POMODORO_FOCUS_OPTIONS = [
+  { value: 15, label: '15 min' },
+  { value: 20, label: '20 min' },
+  { value: 25, label: '25 min' },
+  { value: 30, label: '30 min' },
+  { value: 45, label: '45 min' },
+  { value: 50, label: '50 min' },
+];
+
+export const POMODORO_SHORT_BREAK_OPTIONS = [
+  { value: 3, label: '3 min' },
+  { value: 5, label: '5 min' },
+  { value: 10, label: '10 min' },
+];
+
+export const POMODORO_LONG_BREAK_OPTIONS = [
+  { value: 10, label: '10 min' },
+  { value: 15, label: '15 min' },
+  { value: 20, label: '20 min' },
+  { value: 30, label: '30 min' },
+];
+
+export const POMODORO_INTERVAL_OPTIONS = [
+  { value: 2, label: '2 sesiones' },
+  { value: 3, label: '3 sesiones' },
+  { value: 4, label: '4 sesiones' },
+  { value: 5, label: '5 sesiones' },
+];
