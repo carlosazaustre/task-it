@@ -37,6 +37,6 @@ jobs:
           curl -fsS \
             --insecure \
             --max-time 30 \
-            -X GET \
+            -X POST \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}" \
             "${{ secrets.COOLIFY_WEBHOOK_URL }}"
