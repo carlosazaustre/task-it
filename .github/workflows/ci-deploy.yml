@@ -35,6 +35,7 @@ jobs:
       - name: Trigger Coolify deployment
         run: |
           curl -fsS \
+            --insecure \
             --max-time 30 \
             -X GET \
             -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}" \
