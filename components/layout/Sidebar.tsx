@@ -1,5 +1,6 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { Check, X } from 'lucide-react';
 import { NavItem } from './NavItem';
 import { UserProfile } from './UserProfile';
@@ -8,7 +9,6 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
-  currentPath?: string;
   user?: {
     name: string;
     role: string;
@@ -26,9 +26,10 @@ const defaultUser = {
 export function Sidebar({
   isOpen = false,
   onClose,
-  currentPath = '/',
   user = defaultUser,
 }: SidebarProps) {
+  const currentPath = usePathname();
+
   return (
     <aside
       className={`
@@ -40,7 +41,7 @@ export function Sidebar({
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `.trim().replace(/\s+/g, ' ')}
     >
-      {/* Header con Logo y botón cerrar en mobile */}
+      {/* Header con Logo y boton cerrar en mobile */}
       <div>
         <div className="flex items-center justify-between mb-8">
           {/* Logo */}
@@ -53,12 +54,12 @@ export function Sidebar({
             </span>
           </div>
 
-          {/* Botón cerrar (solo mobile) */}
+          {/* Boton cerrar (solo mobile) */}
           {onClose && (
             <button
               onClick={onClose}
               className="lg:hidden p-2 hover:bg-background/50 rounded-lg transition-colors"
-              aria-label="Cerrar menú"
+              aria-label="Cerrar menu"
             >
               <X className="w-5 h-5 text-muted-foreground" />
             </button>
@@ -70,16 +71,19 @@ export function Sidebar({
           <NavItem
             icon="layout-dashboard"
             label="Dashboard"
+            href="/"
             active={currentPath === '/'}
           />
           <NavItem
             icon="list-todo"
             label="Mis Tareas"
+            href="/"
             active={currentPath === '/tasks'}
           />
           <NavItem
             icon="calendar"
             label="Calendario"
+            href="/calendar"
             active={currentPath === '/calendar'}
           />
           <NavItem

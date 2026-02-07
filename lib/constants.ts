@@ -4,6 +4,7 @@ import type {
   TagColor,
   TaskFormData,
   TaskFilters,
+  CalendarViewType,
 } from './types';
 
 // Task Status metadata
@@ -79,4 +80,21 @@ export const VALIDATION = {
   TASK_TITLE_MAX_LENGTH: 100,
   TASK_DESCRIPTION_MAX_LENGTH: 500,
   TAG_NAME_MAX_LENGTH: 20,
+} as const;
+
+// Calendar
+export const CALENDAR_VIEWS: { value: CalendarViewType; label: string }[] = [
+  { value: 'month', label: 'Mes' },
+  { value: 'week', label: 'Semana' },
+  { value: 'day', label: 'Día' },
+];
+
+export const WEEKDAY_LABELS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+export const WEEKDAY_LETTERS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+
+export const CALENDAR_DEFAULTS = {
+  START_HOUR: 8,
+  END_HOUR: 18,
+  HOUR_HEIGHT_PX: 80,
+  WEEK_HOUR_HEIGHT_PX: 60,
 } as const;

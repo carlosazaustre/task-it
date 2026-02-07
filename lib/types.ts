@@ -1,3 +1,6 @@
+// Calendar View Types
+export type CalendarViewType = 'month' | 'week' | 'day';
+
 // Task Status Types
 export type TaskStatus = 'pending' | 'in_progress' | 'completed';
 

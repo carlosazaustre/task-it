@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react';
 import { useTasks } from '@/hooks/useTasks';
 import { useTags } from '@/hooks/useTags';
 import { useTaskFilters } from '@/hooks/useTaskFilters';
-import { Sidebar, PageHeader } from '@/components/layout';
+import { AppShell, PageHeader } from '@/components/layout';
 import { FilterChips } from '@/components/task/FilterChips';
 import { TaskList } from '@/components/task/TaskList';
 import { TaskForm } from '@/components/task/TaskForm';
@@ -111,67 +111,57 @@ export default function Home() {
   );
 
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar - Desktop */}
-      <div className="hidden lg:block">
-        <Sidebar />
+    <AppShell>
+      {/* PageHeader */}
+      <PageHeader
+        title="Mis Tareas"
+        subtitle="Gestiona y organiza tus tareas diarias"
+        searchValue={filters.search}
+        onSearchChange={(value) => setFilters({ ...filters, search: value })}
+        actions={
+          <Button onClick={handleCreateTask} variant="primary">
+            <Plus className="w-5 h-5 mr-1.5" />
+            Nueva Tarea
+          </Button>
+        }
+      />
+
+      {/* FilterChips */}
+      <div className="mt-6 mb-8">
+        <FilterChips
+          options={filterOptions}
+          selected={selectedFilter}
+          onChange={handleFilterChange}
+        />
       </div>
 
-      {/* Main Content */}
-      <main className="flex-1 bg-background">
-        <div className="p-6 lg:p-10 xl:px-12 xl:py-10">
-          {/* PageHeader */}
-          <PageHeader
-            title="Mis Tareas"
-            subtitle="Gestiona y organiza tus tareas diarias"
-            searchValue={filters.search}
-            onSearchChange={(value) => setFilters({ ...filters, search: value })}
-            actions={
-              <Button onClick={handleCreateTask} variant="primary">
-                <Plus className="w-5 h-5 mr-1.5" />
-                Nueva Tarea
-              </Button>
-            }
-          />
+      {/* TaskList */}
+      <TaskList
+        tasks={filteredTasks}
+        tags={tags}
+        isLoading={isLoading}
+        onEdit={handleEditTask}
+        onDelete={handleDeleteTask}
+        onStatusChange={handleStatusChange}
+      />
 
-          {/* FilterChips */}
-          <div className="mt-6 mb-8">
-            <FilterChips
-              options={filterOptions}
-              selected={selectedFilter}
-              onChange={handleFilterChange}
-            />
-          </div>
-
-          {/* TaskList */}
-          <TaskList
-            tasks={filteredTasks}
-            tags={tags}
-            isLoading={isLoading}
-            onEdit={handleEditTask}
-            onDelete={handleDeleteTask}
-            onStatusChange={handleStatusChange}
-          />
-        </div>
-
-        {/* Task form modal */}
-        <Modal
-          isOpen={isFormModalOpen}
-          onClose={handleFormCancel}
-          title={editingTask ? 'Editar tarea' : 'Nueva tarea'}
-          size="lg"
-        >
-          <TaskForm
-            key={editingTask?.id ?? 'new'}
-            task={editingTask}
-            tags={tags}
-            onSubmit={handleFormSubmit}
-            onCancel={handleFormCancel}
-            onCreateTag={handleCreateTag}
-            isSubmitting={isSubmitting}
-          />
-        </Modal>
-      </main>
-    </div>
+      {/* Task form modal */}
+      <Modal
+        isOpen={isFormModalOpen}
+        onClose={handleFormCancel}
+        title={editingTask ? 'Editar tarea' : 'Nueva tarea'}
+        size="lg"
+      >
+        <TaskForm
+          key={editingTask?.id ?? 'new'}
+          task={editingTask}
+          tags={tags}
+          onSubmit={handleFormSubmit}
+          onCancel={handleFormCancel}
+          onCreateTag={handleCreateTag}
+          isSubmitting={isSubmitting}
+        />
+      </Modal>
+    </AppShell>
   );
 }
