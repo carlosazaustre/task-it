@@ -71,14 +71,14 @@ export function Sidebar({
           <NavItem
             icon="layout-dashboard"
             label="Dashboard"
-            href="/"
-            active={currentPath === '/'}
+            href="/analytics"
+            active={currentPath === '/analytics'}
           />
           <NavItem
             icon="list-todo"
             label="Mis Tareas"
             href="/"
-            active={currentPath === '/tasks'}
+            active={currentPath === '/'}
           />
           <NavItem
             icon="calendar"

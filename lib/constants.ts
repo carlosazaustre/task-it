@@ -6,6 +6,7 @@ import type {
   TaskFilters,
   CalendarViewType,
   PomodoroConfig,
+  AnalyticsDateRange,
 } from './types';
 
 // Task Status metadata
@@ -76,6 +77,7 @@ export const STORAGE_KEYS = {
   TAGS: 'task-it-tags',
   POMODORO_CONFIG: 'task-it-pomodoro-config',
   POMODORO_STATE: 'task-it-pomodoro-state',
+  ANALYTICS_DATE_RANGE: 'task-it-analytics-date-range',
 } as const;
 
 // Validation limits
@@ -146,3 +148,16 @@ export const POMODORO_INTERVAL_OPTIONS = [
   { value: 4, label: '4 sesiones' },
   { value: 5, label: '5 sesiones' },
 ];
+
+// Analytics
+export const ANALYTICS_DATE_RANGES: { value: AnalyticsDateRange; label: string }[] = [
+  { value: 'this_week', label: 'Esta semana' },
+  { value: 'last_7_days', label: 'Últimos 7 días' },
+  { value: 'this_month', label: 'Este mes' },
+  { value: 'last_30_days', label: 'Últimos 30 días' },
+];
+
+export const ANALYTICS_DEFAULTS = {
+  DATE_RANGE: 'this_week' as AnalyticsDateRange,
+  MAX_RECENT_ACTIVITIES: 5,
+} as const;

@@ -111,3 +111,52 @@ export interface PomodoroState {
   isPaused: boolean;
   startedAt: string | null;
 }
+
+// === Analytics Types ===
+
+export type AnalyticsDateRange = 'this_week' | 'last_7_days' | 'this_month' | 'last_30_days';
+
+export interface KpiData {
+  completedCount: number;
+  completionRate: number;
+  focusTimeHours: number;
+  currentStreak: number;
+}
+
+export interface KpiTrend {
+  value: number;
+  isPositive: boolean;
+}
+
+export interface DailyActivity {
+  date: string;
+  dayLabel: string;
+  completed: number;
+  pending: number;
+}
+
+export interface TagCount {
+  tagId: string;
+  tagName: string;
+  tagColor: TagColor;
+  count: number;
+}
+
+export type ActivityActionType = 'completed' | 'created' | 'pomodoro';
+
+export interface ActivityItem {
+  id: string;
+  action: ActivityActionType;
+  title: string;
+  meta: string;
+  timestamp: string;
+}
+
+export interface AnalyticsData {
+  kpis: KpiData;
+  kpiTrends: Record<keyof KpiData, KpiTrend>;
+  weeklyActivity: DailyActivity[];
+  tagDistribution: TagCount[];
+  recentActivity: ActivityItem[];
+  totalTasksInRange: number;
+}
