@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.6.0] - 2026-02-08
+
+### Added
+
+- **Settings page** at `/settings` with 6 configurable sections:
+  - **Profile**: edit name, email, role, and language with auto-generated avatar initials.
+  - **Appearance**: visual theme selector (light/dark/system) with preview cards and ARIA radio semantics.
+  - **Pomodoro**: focus/break duration selects, auto-start and sound toggles.
+  - **Notifications**: toggles for task reminders, daily summary, and streak alerts.
+  - **Tags**: full CRUD management with color picker grid, inline edit/delete, and modal form.
+  - **Data**: JSON export/import with file validation, and danger zone with delete confirmation modal.
+- `useSettings` hook for centralized localStorage persistence of profile, notifications, pomodoro preferences, and data management.
+- Shared `Toggle` and `ReadOnlyField` UI components extracted during code review.
+- `TAG_COLOR_CLASS` constant centralized in `lib/constants.ts` for design system consistency.
+- Settings sidebar navigation with smooth scroll-to-section behavior (hidden on mobile).
+- Sidebar "Ajustes" link now navigates to `/settings`.
+
+---
+
 ## [0.5.0] - 2026-02-08
 
 ### Added
