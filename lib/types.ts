@@ -160,3 +160,36 @@ export interface AnalyticsData {
   recentActivity: ActivityItem[];
   totalTasksInRange: number;
 }
+
+// === Settings Types ===
+
+// User Profile (persistido en localStorage)
+export interface UserProfile {
+  name: string;
+  email: string;
+  role: string;
+  language: 'es' | 'en';
+  initials: string;
+}
+
+// Notification preferences (persistido en localStorage)
+export interface NotificationSettings {
+  taskReminders: boolean;
+  dailySummary: boolean;
+  streakAlert: boolean;
+}
+
+// Pomodoro preferences (autostart y sonido)
+export interface PomodoroPreferences {
+  autoStartNext: boolean;
+  soundEnabled: boolean;
+}
+
+// Settings section identifiers
+export type SettingsSection =
+  | 'profile'
+  | 'appearance'
+  | 'pomodoro'
+  | 'notifications'
+  | 'tags'
+  | 'data';

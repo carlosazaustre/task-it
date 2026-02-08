@@ -95,6 +95,7 @@ export function Sidebar({
           <NavItem
             icon="settings"
             label="Ajustes"
+            href="/settings"
             active={currentPath === '/settings'}
           />
         </nav>

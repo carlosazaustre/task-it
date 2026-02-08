@@ -7,6 +7,10 @@ import type {
   CalendarViewType,
   PomodoroConfig,
   AnalyticsDateRange,
+  UserProfile,
+  NotificationSettings,
+  PomodoroPreferences,
+  SettingsSection,
 } from './types';
 
 // Task Status metadata
@@ -52,6 +56,27 @@ export const TAG_COLORS: TagColor[] = [
   'rose',
 ];
 
+// Tailwind color classes for tags (used in UI components)
+export const TAG_COLOR_CLASS: Record<TagColor, string> = {
+  red: 'bg-red-500',
+  orange: 'bg-orange-500',
+  amber: 'bg-amber-500',
+  yellow: 'bg-yellow-500',
+  lime: 'bg-lime-500',
+  green: 'bg-green-500',
+  emerald: 'bg-emerald-500',
+  teal: 'bg-teal-500',
+  cyan: 'bg-cyan-500',
+  sky: 'bg-sky-500',
+  blue: 'bg-blue-500',
+  indigo: 'bg-indigo-500',
+  violet: 'bg-violet-500',
+  purple: 'bg-purple-500',
+  fuchsia: 'bg-fuchsia-500',
+  pink: 'bg-pink-500',
+  rose: 'bg-rose-500',
+};
+
 // Default values for new task
 export const DEFAULT_TASK: TaskFormData = {
   title: '',
@@ -78,6 +103,9 @@ export const STORAGE_KEYS = {
   POMODORO_CONFIG: 'task-it-pomodoro-config',
   POMODORO_STATE: 'task-it-pomodoro-state',
   ANALYTICS_DATE_RANGE: 'task-it-analytics-date-range',
+  USER_PROFILE: 'task-it-user-profile',
+  NOTIFICATION_SETTINGS: 'task-it-notification-settings',
+  POMODORO_PREFERENCES: 'task-it-pomodoro-preferences',
 } as const;
 
 // Validation limits
@@ -161,3 +189,48 @@ export const ANALYTICS_DEFAULTS = {
   DATE_RANGE: 'this_week' as AnalyticsDateRange,
   MAX_RECENT_ACTIVITIES: 5,
 } as const;
+
+// Settings
+export const SETTINGS_SECTIONS: {
+  value: SettingsSection;
+  label: string;
+  icon: string;
+}[] = [
+  { value: 'profile', label: 'Perfil', icon: 'user' },
+  { value: 'appearance', label: 'Apariencia', icon: 'palette' },
+  { value: 'pomodoro', label: 'Pomodoro', icon: 'timer' },
+  { value: 'notifications', label: 'Notificaciones', icon: 'bell' },
+  { value: 'tags', label: 'Etiquetas', icon: 'tags' },
+  { value: 'data', label: 'Datos', icon: 'database' },
+];
+
+export const DEFAULT_USER_PROFILE: UserProfile = {
+  name: '',
+  email: '',
+  role: '',
+  language: 'es',
+  initials: 'U',
+};
+
+export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
+  taskReminders: true,
+  dailySummary: false,
+  streakAlert: true,
+};
+
+export const DEFAULT_POMODORO_PREFERENCES: PomodoroPreferences = {
+  autoStartNext: true,
+  soundEnabled: true,
+};
+
+export const LANGUAGE_OPTIONS = [
+  { value: 'es', label: 'Español' },
+  { value: 'en', label: 'English' },
+];
+
+// Theme options for settings
+export const THEME_OPTIONS: { value: 'light' | 'dark' | 'system'; label: string }[] = [
+  { value: 'light', label: 'Claro' },
+  { value: 'dark', label: 'Oscuro' },
+  { value: 'system', label: 'Sistema' },
+];
