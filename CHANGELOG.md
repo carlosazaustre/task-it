@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.5.0] - 2026-02-08
+
+### Added
+
+- **Dashboard Analytics** view at `/analytics` with productivity metrics computed from existing localStorage data.
+  - **4 KPI cards**: Tareas Completadas, Tasa de Completado, Tiempo de Focus, and Racha Actual — each with trend badges comparing current vs. previous period.
+  - **Weekly Activity chart** (CSS-only, no chart library) with paired bars for completed (violet) and pending (gray) tasks per day (Mon–Sun), highlighting the current day.
+  - **Tag Distribution** with SVG donut chart and progress bars per tag, showing proportional task counts.
+  - **Recent Activity** feed with the last 5 actions (completed, created) and relative timestamps.
+  - **Date range selector** dropdown with 4 options: Esta semana, Últimos 7 días, Este mes, Últimos 30 días — persisted in localStorage.
+  - Export button (disabled for MVP, placeholder for future iteration).
+  - `useAnalytics` hook composing `useTasks`, `useTags`, and Pomodoro state with full memoization.
+  - Pure utility functions in `analytics-utils.ts`: date ranges, KPI computation, streak calculation, weekly activity, tag distribution, recent activity, and relative time formatting.
+  - Analytics types: `AnalyticsDateRange`, `KpiData`, `KpiTrend`, `DailyActivity`, `TagCount`, `ActivityItem`, `AnalyticsData`.
+  - Responsive layout: 2-column KPIs on mobile, 4-column on desktop; stacked bottom panels on mobile.
+  - Full dark mode support using CSS variables.
+  - Accessible dropdown with ARIA attributes (`aria-haspopup`, `aria-expanded`, `role="listbox"`).
+
+### Changed
+
+- Sidebar navigation: "Dashboard" now links to `/analytics`, "Mis Tareas" correctly activates on `/`.
+
 ## [0.4.0] - 2026-02-07
 
 ### Added
