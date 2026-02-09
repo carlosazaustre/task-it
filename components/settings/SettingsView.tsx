@@ -8,6 +8,7 @@ import {
   Bell,
   Tags,
   Database,
+  Key,
 } from 'lucide-react';
 import { useSettings } from '@/hooks/useSettings';
 import { SettingsProfile } from './SettingsProfile';
@@ -16,6 +17,7 @@ import { SettingsPomodoro } from './SettingsPomodoro';
 import { SettingsNotifications } from './SettingsNotifications';
 import { SettingsTags } from './SettingsTags';
 import { SettingsData } from './SettingsData';
+import { SettingsApiKeys } from './SettingsApiKeys';
 import { cn } from '@/lib/utils';
 import type { SettingsSection } from '@/lib/types';
 
@@ -29,6 +31,7 @@ const NAV_ITEMS: {
   { id: 'pomodoro', label: 'Pomodoro', icon: Timer },
   { id: 'notifications', label: 'Notificaciones', icon: Bell },
   { id: 'tags', label: 'Etiquetas', icon: Tags },
+  { id: 'api-keys', label: 'API Keys', icon: Key },
   { id: 'data', label: 'Datos', icon: Database },
 ];
 
@@ -122,6 +125,10 @@ export function SettingsView() {
 
           <div id="settings-tags">
             <SettingsTags />
+          </div>
+
+          <div id="settings-api-keys">
+            <SettingsApiKeys />
           </div>
 
           <div id="settings-data">

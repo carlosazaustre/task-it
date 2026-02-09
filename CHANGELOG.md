@@ -7,6 +7,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.0.0] - 2026-02-09
+
+### Added
+
+**Backend & Database**
+- PostgreSQL database with Prisma ORM (6 models: User, Task, Tag, UserSettings, PomodoroSession, ApiKey).
+- Database migrations and seed data with default tags and settings per user.
+- Docker Compose setup with PostgreSQL 17 Alpine (port 5433, health checks, persistent volume).
+- `npm run setup` one-command project initialization (Docker + migrations + seed).
+
+**Authentication**
+- Auth.js (NextAuth v5) with credentials provider and JWT strategy.
+- User registration (`/api/auth/register`) with bcrypt password hashing and rate limiting.
+- Login/Register pages with form validation.
+- Route protection via Next.js middleware.
+- Dual auth system: session cookies (frontend) + API key Bearer tokens (MCP/external).
+
+**REST API (22 endpoints at /api/v1/)**
+- Tasks CRUD with pagination, filtering (status, priority, tags, search, overdue), and sorting.
+- Tags CRUD with duplicate name detection and ownership scoping.
+- Settings GET/PATCH with deep merge and upsert.
+- Profile GET/PATCH with computed initials.
+- Pomodoro sessions POST/GET with date range filtering.
+- Pomodoro stats aggregation (total, weekly, averages).
+- Analytics endpoint with KPIs, trends, weekly activity, tag distribution.
+- Data export/import (JSON) with atomic transactions.
+- Data delete with confirmation header requirement.
+- API Keys management (create, list, revoke).
+
+**Frontend Migration**
+- API client (`lib/api-client.ts`) with typed methods, error handling, and response unwrapping.
+- `useTasks` and `useTags` hooks migrated from localStorage to API calls with optimistic updates.
+- `useSettings` hook with API sync on mount and fire-and-forget updates.
+- Error states and retry buttons in TaskList and TaskForm components.
+- API Keys management UI in Settings page.
+
+**MCP Server**
+- Standalone MCP server package (`mcp-server/`) with stdio transport.
+- 7 tools: create_task, list_tasks, update_task, complete_task, delete_task, list_tags, create_tag.
+- 2 resources: taskit://summary, taskit://tasks/pending.
+
+**Testing & Security**
+- Vitest test suite with 93 tests (API endpoints + hooks).
+- Rate limiting on auth endpoints (in-memory sliding window).
+- Security headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy).
+
+### Fixed
+
+- Data export/import now uses the database API instead of localStorage (data was invisible after import).
+- Legacy localStorage export format is auto-detected and transformed during import for backward compatibility.
+
+### Changed
+
+- `useTasks` and `useTags` no longer use localStorage (source of truth is now the database).
+- `exportData`, `importData`, and `clearAllData` in useSettings now operate through the REST API.
+- Build script now runs `prisma generate` before `next build`.
+- UserProfile component uses Auth.js session instead of localStorage.
+
+---
+
 ## [0.6.0] - 2026-02-08
 
 ### Added

@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  name           String
+  password       String
+  role           String   @default("developer")
+  language       String   @default("es")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  tasks          Task[]
+  tags           Tag[]
+  settings       UserSettings?
+  pomodoroSessions PomodoroSession[]
+  apiKeys        ApiKey[]
+
+  @@map("users")
+}
+
+model Task {
+  id          String       @id @default(cuid())
+  title       String
+  description String       @default("")
+  status      TaskStatus   @default(PENDING)
+  priority    TaskPriority @default(MEDIUM)
+  dueDate     DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tags        Tag[]
+
+  @@index([userId])
+  @@index([userId, status])
+  @@index([userId, dueDate])
+  @@map("tasks")
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum TaskPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String
+  color     String
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tasks     Task[]
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("tags")
+}
+
+model UserSettings {
+  id                   String  @id @default(cuid())
+
+  theme                String  @default("system")
+
+  pomodoroFocusMin     Int     @default(25)
+  pomodoroShortBreak   Int     @default(5)
+  pomodoroLongBreak    Int     @default(15)
+  pomodoroLongInterval Int     @default(4)
+  pomodoroTotalMin     Int     @default(240)
+  pomodoroAutoStart    Boolean @default(false)
+  pomodoroSoundEnabled Boolean @default(true)
+
+  taskReminders        Boolean @default(true)
+  dailySummary         Boolean @default(false)
+  streakAlert          Boolean @default(true)
+
+  userId               String  @unique
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+model PomodoroSession {
+  id                String    @id @default(cuid())
+  startedAt         DateTime
+  completedAt       DateTime?
+  totalMinutes      Int
+  focusMinutes      Int
+  sessionsPlanned   Int
+  sessionsCompleted Int
+  taskIds           String[]
+
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, startedAt])
+  @@map("pomodoro_sessions")
+}
+
+model ApiKey {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  name      String
+  lastUsed  DateTime?
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([key])
+  @@map("api_keys")
+}

@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/Button';
 import type { Task, TaskFormData, TagFormData } from '@/lib/types';
 
 export default function Home() {
-  const { tasks, isLoading, addTask, updateTask, deleteTask, cycleStatus } = useTasks();
+  const { tasks, isLoading, error, addTask, updateTask, deleteTask, cycleStatus, refetch } = useTasks();
   const { tags, addTag } = useTags();
   const { filters, setFilters, filteredTasks, counts } = useTaskFilters(tasks);
 
@@ -22,32 +22,40 @@ export default function Home() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Handle opening create form
   const handleCreateTask = useCallback(() => {
     setEditingTask(undefined);
+    setSubmitError(null);
     setIsFormModalOpen(true);
   }, []);
 
   // Handle opening edit form
   const handleEditTask = useCallback((task: Task) => {
     setEditingTask(task);
+    setSubmitError(null);
     setIsFormModalOpen(true);
   }, []);
 
   // Handle form submit (create or edit)
   const handleFormSubmit = useCallback(
-    (data: TaskFormData) => {
+    async (data: TaskFormData) => {
       setIsSubmitting(true);
+      setSubmitError(null);
 
       try {
         if (editingTask) {
-          updateTask(editingTask.id, data);
+          await updateTask(editingTask.id, data);
         } else {
-          addTask(data);
+          await addTask(data);
         }
         setIsFormModalOpen(false);
         setEditingTask(undefined);
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : 'Error al guardar la tarea';
+        setSubmitError(message);
       } finally {
         setIsSubmitting(false);
       }
@@ -59,6 +67,7 @@ export default function Home() {
   const handleFormCancel = useCallback(() => {
     setIsFormModalOpen(false);
     setEditingTask(undefined);
+    setSubmitError(null);
   }, []);
 
   // Handle delete task
@@ -140,6 +149,8 @@ export default function Home() {
         tasks={filteredTasks}
         tags={tags}
         isLoading={isLoading}
+        error={error}
+        onRetry={refetch}
         onEdit={handleEditTask}
         onDelete={handleDeleteTask}
         onStatusChange={handleStatusChange}
@@ -160,6 +171,7 @@ export default function Home() {
           onCancel={handleFormCancel}
           onCreateTag={handleCreateTag}
           isSubmitting={isSubmitting}
+          submitError={submitError}
         />
       </Modal>
     </AppShell>

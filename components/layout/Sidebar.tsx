@@ -9,24 +9,11 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
-  user?: {
-    name: string;
-    role: string;
-    initials: string;
-    avatarUrl?: string;
-  };
 }
-
-const defaultUser = {
-  name: 'Usuario',
-  role: 'Desarrollador',
-  initials: 'U',
-};
 
 export function Sidebar({
   isOpen = false,
   onClose,
-  user = defaultUser,
 }: SidebarProps) {
   const currentPath = usePathname();
 
@@ -110,12 +97,7 @@ export function Sidebar({
         </div>
 
         {/* User Profile */}
-        <UserProfile
-          name={user.name}
-          role={user.role}
-          initials={user.initials}
-          avatarUrl={user.avatarUrl}
-        />
+        <UserProfile />
       </div>
     </aside>
   );

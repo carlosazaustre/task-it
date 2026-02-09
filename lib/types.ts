@@ -192,4 +192,21 @@ export type SettingsSection =
   | 'pomodoro'
   | 'notifications'
   | 'tags'
-  | 'data';
+  | 'data'
+  | 'api-keys';
+
+// API Key types
+export interface ApiKeyListItem {
+  id: string;
+  name: string;
+  keyPreview: string;
+  lastUsed: string | null;
+  createdAt: string;
+}
+
+export interface ApiKeyCreated {
+  id: string;
+  name: string;
+  key: string;
+  createdAt: string;
+}

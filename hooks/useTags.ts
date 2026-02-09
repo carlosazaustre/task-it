@@ -1,50 +1,83 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
-import { useLocalStorage } from './useLocalStorage';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { api, ApiError } from '@/lib/api-client';
+import type { ApiTag } from '@/lib/api-client';
 import type { Tag, TagFormData } from '@/lib/types';
-import { STORAGE_KEYS } from '@/lib/constants';
 
 /**
- * Generate a unique ID for tags.
- * Uses crypto.randomUUID if available, falls back to timestamp-based ID.
+ * Generate a temporary ID for optimistic updates.
  */
-function generateId(): string {
+function generateTempId(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
+    return `temp-${crypto.randomUUID()}`;
   }
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+  return `temp-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 }
 
 /**
- * Default tags to use as initial value if localStorage is empty.
- * Note: These have fixed IDs to ensure consistency across SSR/client hydration.
+ * Map API tag response to frontend Tag type.
  */
-const DEFAULT_TAGS: Tag[] = [
-  { id: 'default-tag-trabajo', name: 'Trabajo', color: 'blue' },
-  { id: 'default-tag-personal', name: 'Personal', color: 'green' },
-  { id: 'default-tag-urgente', name: 'Urgente', color: 'red' },
-  { id: 'default-tag-reunion', name: 'Reunión', color: 'purple' },
-  { id: 'default-tag-idea', name: 'Idea', color: 'amber' },
-];
+function mapApiTag(apiTag: ApiTag): Tag {
+  return {
+    id: apiTag.id,
+    name: apiTag.name,
+    color: apiTag.color as Tag['color'],
+  };
+}
 
 /**
- * Hook for CRUD operations on tags with localStorage persistence.
+ * Hook for CRUD operations on tags with API persistence.
+ * Maintains the same public interface as the localStorage version.
  */
 export function useTags() {
-  // Use DEFAULT_TAGS as initial value - this will be used if localStorage is empty
-  const [tags, setTags] = useLocalStorage<Tag[]>(STORAGE_KEYS.TAGS, DEFAULT_TAGS);
-
-  // isLoading is derived from whether we're on the client
-  const isLoading = typeof window === 'undefined';
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const hasFetched = useRef(false);
 
   /**
-   * Add a new tag.
-   * Validates that the name is unique (case-insensitive).
+   * Fetch all tags from the API.
+   */
+  const fetchTags = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await api.getTags();
+      const mapped = (response as ApiTag[]).map(mapApiTag);
+      setTags(mapped);
+    } catch (err) {
+      const message =
+        err instanceof ApiError ? err.message : 'Error al cargar etiquetas';
+      setError(message);
+      console.error('Error fetching tags:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  /**
+   * Refetch tags from API.
+   */
+  const refetch = useCallback(() => {
+    return fetchTags();
+  }, [fetchTags]);
+
+  // Fetch tags on mount
+  useEffect(() => {
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      fetchTags();
+    }
+  }, [fetchTags]);
+
+  /**
+   * Add a new tag with optimistic update.
+   * Validates that the name is unique (case-insensitive) locally before sending.
    */
   const addTag = useCallback(
-    (data: TagFormData): Tag => {
-      // Check for duplicate name (case-insensitive)
+    async (data: TagFormData): Promise<Tag> => {
+      // Check for duplicate name (case-insensitive) locally
       const nameExists = tags.some(
         (tag) => tag.name.toLowerCase() === data.name.toLowerCase()
       );
@@ -53,26 +86,47 @@ export function useTags() {
         throw new Error(`A tag with the name "${data.name}" already exists`);
       }
 
-      const newTag: Tag = {
-        id: generateId(),
+      const tempId = generateTempId();
+      const tempTag: Tag = {
+        id: tempId,
         ...data,
       };
 
-      setTags((prev) => [...prev, newTag]);
-      return newTag;
+      // Optimistic: add temp tag
+      setTags((prev) => [...prev, tempTag]);
+
+      try {
+        const apiResponse = await api.createTag(data);
+        const newTag = mapApiTag(apiResponse);
+
+        // Replace temp tag with real one
+        setTags((prev) =>
+          prev.map((t) => (t.id === tempId ? newTag : t))
+        );
+
+        return newTag;
+      } catch (err) {
+        // Revert optimistic update
+        setTags((prev) => prev.filter((t) => t.id !== tempId));
+        const message =
+          err instanceof ApiError ? err.message : 'Error al crear etiqueta';
+        setError(message);
+        throw err;
+      }
     },
-    [tags, setTags]
+    [tags]
   );
 
   /**
-   * Update an existing tag.
+   * Update an existing tag with optimistic update.
    * Returns the updated tag or null if not found.
    */
   const updateTag = useCallback(
-    (id: string, data: Partial<TagFormData>): Tag | null => {
-      let updatedTag: Tag | null = null;
+    async (id: string, data: Partial<TagFormData>): Promise<Tag | null> => {
+      const tagIndex = tags.findIndex((t) => t.id === id);
+      if (tagIndex === -1) return null;
 
-      // If updating name, check for duplicates (case-insensitive, excluding current tag)
+      // If updating name, check for duplicates locally
       if (data.name) {
         const nameExists = tags.some(
           (tag) =>
@@ -85,50 +139,68 @@ export function useTags() {
         }
       }
 
-      setTags((prev) => {
-        const index = prev.findIndex((tag) => tag.id === id);
-        if (index === -1) {
-          return prev;
-        }
+      const previousTag = tags[tagIndex];
+      const optimisticTag: Tag = {
+        ...previousTag,
+        ...data,
+      };
 
-        const updated: Tag = {
-          ...prev[index],
-          ...data,
-        };
-        updatedTag = updated;
+      // Optimistic update
+      setTags((prev) =>
+        prev.map((t) => (t.id === id ? optimisticTag : t))
+      );
 
-        const newTags = [...prev];
-        newTags[index] = updated;
-        return newTags;
-      });
+      try {
+        const apiResponse = await api.updateTag(id, data);
+        const updatedTag = mapApiTag(apiResponse);
 
-      return updatedTag;
+        // Replace with real API response
+        setTags((prev) =>
+          prev.map((t) => (t.id === id ? updatedTag : t))
+        );
+
+        return updatedTag;
+      } catch (err) {
+        // Revert to previous state
+        setTags((prev) =>
+          prev.map((t) => (t.id === id ? previousTag : t))
+        );
+        const message =
+          err instanceof ApiError ? err.message : 'Error al actualizar etiqueta';
+        setError(message);
+        throw err;
+      }
     },
-    [tags, setTags]
+    [tags]
   );
 
   /**
-   * Delete a tag by ID.
+   * Delete a tag by ID with optimistic update.
    * Returns true if deleted, false if not found.
-   * Note: Does not remove tag references from tasks.
    */
   const deleteTag = useCallback(
-    (id: string): boolean => {
-      let deleted = false;
+    async (id: string): Promise<boolean> => {
+      const tagIndex = tags.findIndex((t) => t.id === id);
+      if (tagIndex === -1) return false;
 
-      setTags((prev) => {
-        const index = prev.findIndex((tag) => tag.id === id);
-        if (index === -1) {
-          return prev;
-        }
+      const previousTags = [...tags];
 
-        deleted = true;
-        return prev.filter((tag) => tag.id !== id);
-      });
+      // Optimistic removal
+      setTags((prev) => prev.filter((t) => t.id !== id));
 
-      return deleted;
+      try {
+        await api.deleteTag(id);
+        return true;
+      } catch (err) {
+        // Revert
+        setTags(previousTags);
+        const message =
+          err instanceof ApiError ? err.message : 'Error al eliminar etiqueta';
+        setError(message);
+        throw err;
+      }
     },
-    [setTags]
+    [tags]
   );
 
   /**
@@ -159,12 +231,14 @@ export function useTags() {
     () => ({
       tags,
       isLoading,
+      error,
       addTag,
       updateTag,
       deleteTag,
       getTag,
       getTagsByIds,
+      refetch,
     }),
-    [tags, isLoading, addTag, updateTag, deleteTag, getTag, getTagsByIds]
+    [tags, isLoading, error, addTag, updateTag, deleteTag, getTag, getTagsByIds, refetch]
   );
 }

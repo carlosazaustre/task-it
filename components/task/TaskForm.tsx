@@ -13,9 +13,10 @@ import { Button } from '@/components/ui/Button';
 interface TaskFormProps {
   task?: Task;
   tags: Tag[];
-  onSubmit: (data: TaskFormData) => void;
+  onSubmit: (data: TaskFormData) => void | Promise<void>;
   onCancel: () => void;
   isSubmitting?: boolean;
+  submitError?: string | null;
   onCreateTag?: (name: string) => void;
 }
 
@@ -44,6 +45,7 @@ export function TaskForm({
   onSubmit,
   onCancel,
   isSubmitting = false,
+  submitError,
   onCreateTag,
 }: TaskFormProps) {
   // Use task.id as key to reset form when task changes
@@ -238,6 +240,16 @@ export function TaskForm({
           onCreateTag={onCreateTag}
         />
       </div>
+
+      {/* API Error */}
+      {submitError && (
+        <div
+          className="rounded-[14px] bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive"
+          role="alert"
+        >
+          {submitError}
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex items-center justify-end gap-3 pt-5 border-t border-border">

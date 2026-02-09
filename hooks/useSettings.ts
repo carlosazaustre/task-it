@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useEffect, useRef } from 'react';
 import { useLocalStorage } from './useLocalStorage';
+import { api } from '@/lib/api-client';
 import type {
   UserProfile,
   NotificationSettings,
@@ -15,8 +16,68 @@ import {
   DEFAULT_POMODORO_PREFERENCES,
   POMODORO_DEFAULTS,
 } from '@/lib/constants';
+import type { ImportPayload } from '@/lib/api-client';
+
+interface LegacyTask {
+  title: string;
+  description?: string;
+  status?: string;
+  priority?: string;
+  dueDate?: string | null;
+  tags?: string[];
+}
+
+interface LegacyTag {
+  id: string;
+  name: string;
+  color: string;
+}
+
+const STATUS_MAP: Record<string, string> = {
+  pending: 'PENDING',
+  in_progress: 'IN_PROGRESS',
+  completed: 'COMPLETED',
+};
+
+const PRIORITY_MAP: Record<string, string> = {
+  high: 'HIGH',
+  medium: 'MEDIUM',
+  low: 'LOW',
+};
+
+/**
+ * Transform a legacy localStorage export (double-serialized JSON strings)
+ * into the API import format.
+ */
+function transformLegacyExport(data: Record<string, unknown>): ImportPayload {
+  const legacyTags: LegacyTag[] = typeof data.tags === 'string'
+    ? JSON.parse(data.tags)
+    : [];
+  const legacyTasks: LegacyTask[] = typeof data.tasks === 'string'
+    ? JSON.parse(data.tasks)
+    : [];
+
+  // Build tag lookup: id -> {name, color}
+  const tagById = new Map(legacyTags.map((t) => [t.id, { name: t.name, color: t.color }]));
+
+  return {
+    tags: legacyTags.map((t) => ({ name: t.name, color: t.color })),
+    tasks: legacyTasks.map((t) => ({
+      title: t.title,
+      description: t.description || '',
+      status: (STATUS_MAP[t.status || 'pending'] || 'PENDING') as 'PENDING' | 'IN_PROGRESS' | 'COMPLETED',
+      priority: (PRIORITY_MAP[t.priority || 'medium'] || 'MEDIUM') as 'HIGH' | 'MEDIUM' | 'LOW',
+      dueDate: t.dueDate || null,
+      tags: (t.tags || [])
+        .map((id) => tagById.get(id))
+        .filter((tag): tag is { name: string; color: string } => tag !== undefined),
+    })),
+  };
+}
 
 export function useSettings() {
+  const hasSynced = useRef(false);
+
   // --- Profile ---
   const [profile, setProfile] = useLocalStorage<UserProfile>(
     STORAGE_KEYS.USER_PROFILE,
@@ -38,6 +99,11 @@ export function useSettings() {
         }
         return updated;
       });
+
+      // Try to sync with API (fire-and-forget)
+      api.updateProfile(data).catch(() => {
+        // Silently fail - localStorage is the source of truth as fallback
+      });
     },
     [setProfile]
   );
@@ -52,6 +118,9 @@ export function useSettings() {
   const updateNotification = useCallback(
     (key: keyof NotificationSettings, value: boolean) => {
       setNotifications((prev) => ({ ...prev, [key]: value }));
+
+      // Try to sync with API
+      api.updateSettings({ notifications: { [key]: value } }).catch(() => {});
     },
     [setNotifications]
   );
@@ -66,6 +135,10 @@ export function useSettings() {
   const updatePomodoroPreference = useCallback(
     (key: keyof PomodoroPreferences, value: boolean) => {
       setPomodoroPrefs((prev) => ({ ...prev, [key]: value }));
+
+      // Map to API field names
+      const apiKey = key === 'autoStartNext' ? 'autoStartNext' : 'soundEnabled';
+      api.updateSettings({ pomodoro: { [apiKey]: value } }).catch(() => {});
     },
     [setPomodoroPrefs]
   );
@@ -80,33 +153,86 @@ export function useSettings() {
   const updatePomodoroConfig = useCallback(
     (key: keyof PomodoroConfig, value: number) => {
       setPomodoroConfig((prev) => ({ ...prev, [key]: value }));
+
+      // Map to API field names
+      const keyMap: Record<string, string> = {
+        focusMinutes: 'focusMinutes',
+        shortBreakMinutes: 'shortBreakMinutes',
+        longBreakMinutes: 'longBreakMinutes',
+        longBreakInterval: 'longBreakInterval',
+        totalDurationMinutes: 'totalDurationMinutes',
+      };
+      if (keyMap[key]) {
+        api.updateSettings({ pomodoro: { [keyMap[key]]: value } }).catch(() => {});
+      }
     },
     [setPomodoroConfig]
   );
 
-  // --- Data management ---
-  const exportData = useCallback(() => {
+  // --- Sync from API on mount (hydrate localStorage from server) ---
+  useEffect(() => {
+    if (hasSynced.current) return;
+    hasSynced.current = true;
+
+    // Sync profile from API
+    api.getProfile().then((data) => {
+      if (data && data.name) {
+        setProfile({
+          name: data.name || '',
+          email: data.email || '',
+          role: data.role || '',
+          language: (data.language as 'es' | 'en') || 'es',
+          initials: data.initials || 'U',
+        });
+      }
+    }).catch(() => {});
+
+    // Sync settings from API
+    api.getSettings().then((data) => {
+      if (data) {
+        if (data.notifications) {
+          setNotifications({
+            taskReminders: data.notifications.taskReminders ?? DEFAULT_NOTIFICATION_SETTINGS.taskReminders,
+            dailySummary: data.notifications.dailySummary ?? DEFAULT_NOTIFICATION_SETTINGS.dailySummary,
+            streakAlert: data.notifications.streakAlert ?? DEFAULT_NOTIFICATION_SETTINGS.streakAlert,
+          });
+        }
+        if (data.pomodoro) {
+          setPomodoroPrefs({
+            autoStartNext: data.pomodoro.autoStartNext ?? DEFAULT_POMODORO_PREFERENCES.autoStartNext,
+            soundEnabled: data.pomodoro.soundEnabled ?? DEFAULT_POMODORO_PREFERENCES.soundEnabled,
+          });
+          setPomodoroConfig({
+            focusMinutes: data.pomodoro.focusMinutes ?? POMODORO_DEFAULTS.focusMinutes,
+            shortBreakMinutes: data.pomodoro.shortBreakMinutes ?? POMODORO_DEFAULTS.shortBreakMinutes,
+            longBreakMinutes: data.pomodoro.longBreakMinutes ?? POMODORO_DEFAULTS.longBreakMinutes,
+            longBreakInterval: data.pomodoro.longBreakInterval ?? POMODORO_DEFAULTS.longBreakInterval,
+            totalDurationMinutes: data.pomodoro.totalDurationMinutes ?? POMODORO_DEFAULTS.totalDurationMinutes,
+          });
+        }
+      }
+    }).catch(() => {});
+  }, [setProfile, setNotifications, setPomodoroPrefs, setPomodoroConfig]);
+
+  // --- Data management (via API) ---
+  const exportData = useCallback(async () => {
     if (typeof window === 'undefined') return;
 
-    const data = {
-      tasks: localStorage.getItem(STORAGE_KEYS.TASKS),
-      tags: localStorage.getItem(STORAGE_KEYS.TAGS),
-      pomodoroConfig: localStorage.getItem(STORAGE_KEYS.POMODORO_CONFIG),
-      pomodoroPreferences: localStorage.getItem(STORAGE_KEYS.POMODORO_PREFERENCES),
-      userProfile: localStorage.getItem(STORAGE_KEYS.USER_PROFILE),
-      notificationSettings: localStorage.getItem(STORAGE_KEYS.NOTIFICATION_SETTINGS),
-      exportedAt: new Date().toISOString(),
-    };
+    try {
+      const data = await api.exportAllData();
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: 'application/json',
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `task-it-backup-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: 'application/json',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `task-it-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // Silently fail - user can retry
+    }
   }, []);
 
   const importData = useCallback(
@@ -118,33 +244,21 @@ export function useSettings() {
         }
 
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
           try {
             const data = JSON.parse(e.target?.result as string);
 
-            // Only import if the parsed data has expected keys
             if (!data || typeof data !== 'object') {
               resolve(false);
               return;
             }
 
-            if (data.tasks) localStorage.setItem(STORAGE_KEYS.TASKS, data.tasks);
-            if (data.tags) localStorage.setItem(STORAGE_KEYS.TAGS, data.tags);
-            if (data.pomodoroConfig)
-              localStorage.setItem(STORAGE_KEYS.POMODORO_CONFIG, data.pomodoroConfig);
-            if (data.pomodoroPreferences)
-              localStorage.setItem(
-                STORAGE_KEYS.POMODORO_PREFERENCES,
-                data.pomodoroPreferences
-              );
-            if (data.userProfile)
-              localStorage.setItem(STORAGE_KEYS.USER_PROFILE, data.userProfile);
-            if (data.notificationSettings)
-              localStorage.setItem(
-                STORAGE_KEYS.NOTIFICATION_SETTINGS,
-                data.notificationSettings
-              );
+            // Detect legacy localStorage export format (values are JSON strings, not arrays)
+            const payload = typeof data.tasks === 'string' || typeof data.tags === 'string'
+              ? transformLegacyExport(data)
+              : data;
 
+            await api.importAllData(payload);
             window.location.reload();
             resolve(true);
           } catch {
@@ -160,14 +274,21 @@ export function useSettings() {
     []
   );
 
-  const clearAllData = useCallback(() => {
+  const clearAllData = useCallback(async () => {
     if (typeof window === 'undefined') return;
 
-    Object.values(STORAGE_KEYS).forEach((key) => {
-      localStorage.removeItem(key);
-    });
+    try {
+      await api.clearAllData();
 
-    window.location.reload();
+      // Also clear localStorage cache
+      Object.values(STORAGE_KEYS).forEach((key) => {
+        localStorage.removeItem(key);
+      });
+
+      window.location.reload();
+    } catch {
+      // Silently fail - user can retry
+    }
   }, []);
 
   return useMemo(

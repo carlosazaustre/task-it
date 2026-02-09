@@ -2,11 +2,15 @@
 
 import type { Task, Tag, TaskStatus } from '@/lib/types';
 import { TaskCard } from './TaskCard';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
 interface TaskListProps {
   tasks: Task[];
   tags: Tag[];
   isLoading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   onEdit: (task: Task) => void;
   onDelete: (taskId: string) => void;
   onStatusChange: (taskId: string, status: TaskStatus) => void;
@@ -65,10 +69,36 @@ function EmptyState() {
   );
 }
 
+function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
+  return (
+    <div
+      className="text-center py-16 px-6 bg-card rounded-[24px]"
+      role="alert"
+      aria-label="Error al cargar tareas"
+    >
+      <AlertTriangle className="w-16 h-16 mx-auto text-destructive mb-4" />
+      <h3 className="text-lg font-semibold text-foreground mb-2">
+        Error al cargar tareas
+      </h3>
+      <p className="text-muted-foreground text-sm max-w-sm mx-auto mb-6">
+        {message}
+      </p>
+      {onRetry && (
+        <Button onClick={onRetry} variant="secondary">
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Reintentar
+        </Button>
+      )}
+    </div>
+  );
+}
+
 export function TaskList({
   tasks,
   tags,
   isLoading = false,
+  error,
+  onRetry,
   onEdit,
   onDelete,
   onStatusChange,
@@ -81,6 +111,10 @@ export function TaskList({
         ))}
       </div>
     );
+  }
+
+  if (error) {
+    return <ErrorState message={error} onRetry={onRetry} />;
   }
 
   if (tasks.length === 0) {
