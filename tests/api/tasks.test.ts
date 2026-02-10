@@ -375,7 +375,7 @@ describe('Tasks API – DELETE /api/v1/tasks/[id]', () => {
     const response = await DELETE(request, { params: Promise.resolve({ id: 'task-1' }) })
 
     expect(response.status).toBe(204)
-    expect(mockPrisma.task.delete).toHaveBeenCalledWith({ where: { id: 'task-1' } })
+    expect(mockPrisma.task.delete).toHaveBeenCalledWith({ where: { id: 'task-1', userId: 'user-1' } })
   })
 
   it('returns 404 when task does not exist', async () => {

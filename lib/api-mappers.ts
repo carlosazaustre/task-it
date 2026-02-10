@@ -1,4 +1,5 @@
 import { TaskStatus, TaskPriority } from '@/lib/generated/prisma/client'
+import type { Task, Tag } from '@/lib/generated/prisma/client'
 
 // Map API lowercase to Prisma UPPERCASE
 export const statusToPrisma: Record<string, TaskStatus> = {
@@ -14,7 +15,7 @@ export const priorityToPrisma: Record<string, TaskPriority> = {
 }
 
 // Transform Prisma Task to API response format
-export function taskToApi(task: any) {
+export function taskToApi(task: Task & { tags?: Tag[] }) {
   return {
     id: task.id,
     title: task.title,
@@ -28,7 +29,7 @@ export function taskToApi(task: any) {
   }
 }
 
-export function tagToApi(tag: any) {
+export function tagToApi(tag: Tag) {
   return {
     id: tag.id,
     name: tag.name,

@@ -47,6 +47,10 @@ export function useTags() {
       const mapped = (response as ApiTag[]).map(mapApiTag);
       setTags(mapped);
     } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        window.location.href = '/login';
+        return;
+      }
       const message =
         err instanceof ApiError ? err.message : 'Error al cargar etiquetas';
       setError(message);

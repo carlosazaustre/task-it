@@ -72,29 +72,35 @@ function computeTrend(current: number, previous: number): number {
 }
 
 async function computeStreak(userId: string): Promise<number> {
-  // Count consecutive days with completed tasks, going backwards from today
-  const today = new Date()
-  today.setHours(23, 59, 59, 999)
+  // Fetch all completed task dates in a single query (last 365 days)
+  const cutoff = new Date()
+  cutoff.setDate(cutoff.getDate() - 365)
+  cutoff.setHours(0, 0, 0, 0)
 
+  const completedTasks = await prisma.task.findMany({
+    where: {
+      userId,
+      status: 'COMPLETED',
+      updatedAt: { gte: cutoff },
+    },
+    select: { updatedAt: true },
+  })
+
+  // Build a set of date strings (YYYY-MM-DD) with completed tasks
+  const daysWithCompletions = new Set<string>()
+  for (const task of completedTasks) {
+    daysWithCompletions.add(task.updatedAt.toISOString().split('T')[0])
+  }
+
+  // Count consecutive days going backwards from today
   let streak = 0
-  let currentDate = new Date()
+  const currentDate = new Date()
   currentDate.setHours(0, 0, 0, 0)
 
-  // Check up to 365 days back
   for (let i = 0; i < 365; i++) {
-    const dayStart = new Date(currentDate)
-    const dayEnd = new Date(currentDate)
-    dayEnd.setHours(23, 59, 59, 999)
+    const dateStr = currentDate.toISOString().split('T')[0]
 
-    const count = await prisma.task.count({
-      where: {
-        userId,
-        status: 'COMPLETED',
-        updatedAt: { gte: dayStart, lte: dayEnd },
-      },
-    })
-
-    if (count > 0) {
+    if (daysWithCompletions.has(dateStr)) {
       streak++
     } else {
       // If it's today and no tasks yet, don't break the streak

@@ -14,7 +14,10 @@ const importSchema = z.object({
     description: z.string().default(''),
     status: z.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED']).default('PENDING'),
     priority: z.enum(['HIGH', 'MEDIUM', 'LOW']).default('MEDIUM'),
-    dueDate: z.string().nullable().default(null),
+    dueDate: z.string().nullable().default(null).refine(
+      (val) => val === null || !isNaN(Date.parse(val)),
+      { message: 'Invalid date format for dueDate' }
+    ),
     tags: z.array(z.object({
       name: z.string(),
       color: z.string(),
@@ -34,8 +37,14 @@ const importSchema = z.object({
     streakAlert: z.boolean().optional(),
   }).nullable().optional(),
   pomodoroSessions: z.array(z.object({
-    startedAt: z.string(),
-    completedAt: z.string().nullable().default(null),
+    startedAt: z.string().refine(
+      (val) => !isNaN(Date.parse(val)),
+      { message: 'Invalid date format for startedAt' }
+    ),
+    completedAt: z.string().nullable().default(null).refine(
+      (val) => val === null || !isNaN(Date.parse(val)),
+      { message: 'Invalid date format for completedAt' }
+    ),
     totalMinutes: z.number(),
     focusMinutes: z.number(),
     sessionsPlanned: z.number(),

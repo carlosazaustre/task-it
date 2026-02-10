@@ -61,6 +61,10 @@ export function useTasks() {
       const mapped = response.data.map(mapApiTask);
       setTasks(mapped);
     } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        window.location.href = '/login';
+        return;
+      }
       const message =
         err instanceof ApiError ? err.message : 'Error al cargar tareas';
       setError(message);

@@ -50,7 +50,7 @@ export async function PATCH(
   const { tagIds, status, priority, dueDate, ...rest } = parsed.data
 
   // Build update data
-  const updateData: any = { ...rest }
+  const updateData: Record<string, unknown> = { ...rest }
   if (status) updateData.status = statusToPrisma[status]
   if (priority) updateData.priority = priorityToPrisma[priority]
   if (dueDate !== undefined) updateData.dueDate = dueDate ? new Date(dueDate) : null
@@ -69,7 +69,7 @@ export async function PATCH(
   }
 
   const task = await prisma.task.update({
-    where: { id },
+    where: { id, userId: user.id },
     data: updateData,
     include: { tags: true },
   })
@@ -92,7 +92,7 @@ export async function DELETE(
 
   if (!existing) return apiError('Tarea no encontrada', 404)
 
-  await prisma.task.delete({ where: { id } })
+  await prisma.task.delete({ where: { id, userId: user.id } })
 
   return new Response(null, { status: 204 })
 }
